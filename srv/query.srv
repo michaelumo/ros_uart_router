@@ -1,0 +1,8 @@
+bool lock
+bool crc
+uint8[] head
+uint8[] payload
+uint8 sizeof_payload
+---
+bool ack
+uint8[] data
