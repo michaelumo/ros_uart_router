@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <cstdint>
-#include "nymph/crc16.hpp"
+#include "ros_uart_router/crc16.hpp"
 
 uint16_t crc16_table[256];
 

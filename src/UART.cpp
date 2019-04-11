@@ -4,8 +4,8 @@
 #include <fcntl.h>			//
 #include <termios.h>		//
 #include <ctime>
-#include "nymph/BufferOperation.hpp"
-#include "nymph/UART.hpp"
+#include "ros_uart_router/BufferOperation.hpp"
+#include "ros_uart_router/UART.hpp"
 
 UART::UART(const char* dev, int bd){
   device = dev;

@@ -1,7 +1,8 @@
-bool lock
+const char port[]
+uint16_t baudrate
 bool crc
-uint8[] head
-uint8[] payload
+uint8[3] head
+uint8[256] payload
 uint8 sizeof_payload
 ---
 bool ack
