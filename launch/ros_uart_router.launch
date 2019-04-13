@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="ros_uart_router" type="ros_uart_router_node" name="ros_uart_router" output="screen"></node>
+</launch>

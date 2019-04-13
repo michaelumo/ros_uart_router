@@ -1,7 +1,8 @@
-const char port[]
-uint16_t baudrate
+string device
+uint32 baudrate
+uint8 timeOut
 bool crc
-uint8[3] head
+uint8[2] head
 uint8[256] payload
 uint8 sizeof_payload
 ---

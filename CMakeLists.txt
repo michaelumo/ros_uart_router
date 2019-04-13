@@ -68,10 +68,10 @@ add_service_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+ generate_messages(
+   DEPENDENCIES
+   std_msgs
+ )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -105,7 +105,7 @@ add_service_files(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ros_uart_router
-#  CATKIN_DEPENDS roscpp rospy std_msgs
+#  CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
 #  DEPENDS system_lib
 )
 
@@ -116,7 +116,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -136,7 +136,7 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/ros_uart_router_node.cpp)
 
 ## Rename C++ executable without prefix
-## The above recommended prefix causes long target names, the following renames the
+##  The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
 ## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
 # set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
@@ -149,6 +149,15 @@ include_directories(
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
+
+add_executable(ros_uart_router_node
+src/main.cpp
+src/BufferOperation.cpp
+src/UART.cpp
+src/crc16.cpp
+)
+target_link_libraries(ros_uart_router_node ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+add_dependencies(ros_uart_router_node ros_uart_router_generate_messages_cpp)
 
 #############
 ## Install ##
@@ -177,6 +186,10 @@ include_directories(
 #   FILES_MATCHING PATTERN "*.h"
 #   PATTERN ".svn" EXCLUDE
 # )
+
+install(DIRECTORY launch
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+        )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES

@@ -1,58 +1,50 @@
+/**
+
+Payload structure
+  uint8_t [header: 2 byte, length of payload: 1 byte, payload: max 253 bytes, checksum: 2 bytes]
+
+**/
+
 #include <iostream>
 #include <cmath>
+#include <cstdint>
+#include <vector>
 #include "ros_uart_router/BufferOperation.hpp"
-
+#include "ros_uart_router/crc16.hpp"
 
 BufferOperation::BufferOperation(){
+  crc16Init();
 }
 
-
+// Clearing buffer length
 void BufferOperation::clearBuffer(){
   datalen = 0;
 }
 
-void BufferOperation::split(uint8_t* d, uint8_t* other, int a, int b){
-  for(int i = a; i < b; i++){
+// Spliting arrays
+void BufferOperation::split(std::vector<uint8_t> &d, uint8_t* other, uint8_t a, uint8_t b){
+  for(uint8_t i = a; i < b; i++){
     other[i-a] = d[i];
   }
 }
 
-int BufferOperation::sizeofPayload(){
+// Get length of payload embedded in buffer
+uint8_t BufferOperation::lengthofPayload(){
   uint8_t cs[1];
   split(data, cs, 2, 3);
-  return int(cs[0]);
+  return uint8_t(cs[0]+1);
 }
 
-int BufferOperation::getChecksum(){
-  int num = datalen-(sizeofPayload()+3)-1;//if int then 4, or if long long then 8
-  uint8_t cs[num];
-  int s = 0;
-  split(data, cs, datalen-num, datalen);
-  for(int i = 0; i<num; i++){
-    int tmp = cs[i];
-    s += tmp<<((num-1-i)*8);
-  }
-  return s;
+// Generate checksum from received buffer
+uint16_t BufferOperation::generateChecksum(uint8_t starting_point, uint8_t length_of_checksum){
+  uint8_t cs[lengthofPayload()];
+  split(data, cs, starting_point, datalen-length_of_checksum);
+  return crc16(cs, lengthofPayload());
 }
 
-int BufferOperation::sum(uint8_t* c, int a){
-  int d = 0;
-  for(int i = a; i < a; i++){
-    d += int(c[i]);
-  }
-  return d;
-}
-
-int BufferOperation::sumofPayload(int a){
-  int d = 0;
-  for(int i = a; i < sizeofPayload()+a; i++){
-    d += int(data[i]);
-  }
-  return d;
-}
-
-float BufferOperation::byte2float(int a, int b){
-  uint8_t cs[b-a];
-  split(data, cs, a, b);
-  return (float)sum(cs, b-a);
+// Get checksum embedded in buffer
+uint16_t BufferOperation::getChecksum(){
+  cksm.in8[0] = data[datalen-2];
+  cksm.in8[1] = data[datalen-1];
+  return cksm.in16;
 }
