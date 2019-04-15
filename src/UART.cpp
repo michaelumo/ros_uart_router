@@ -5,6 +5,7 @@
 #include <termios.h>
 #include <ctime>
 #include <cstdint>
+#include "ros/ros.h"
 #include "ros_uart_router/UART.hpp"
 #include "ros_uart_router/BufferOperation.hpp"
 
@@ -45,7 +46,7 @@ bool UART::setup(){
 void UART::readBuffer(BufferOperation &buffer, int timeOut){
   time_t starting_time;
   starting_time = time(NULL);
-  while (1){
+  while (ros::ok()){
     if (uart0_filestream != -1){
       char rx_buffer[256];
       int rx_length = read(uart0_filestream, (void*)rx_buffer, 255);		//Filestream, buffer to store in, number of bytes to read (max)
@@ -56,11 +57,7 @@ void UART::readBuffer(BufferOperation &buffer, int timeOut){
         if(time(NULL)-starting_time > timeOut)break;
       }
       else {
-        for(int i = 0; i < rx_length; i++){
-          buffer.data[i+buffer.datalen] = rx_buffer[i];
-        }
-        buffer.data[buffer.datalen+rx_length] = '\0';
-        buffer.datalen += rx_length;
+        buffer.data.insert(buffer.data.end(), std::begin(rx_buffer), std::end(rx_buffer));
       }
     }
   }
@@ -68,4 +65,8 @@ void UART::readBuffer(BufferOperation &buffer, int timeOut){
 
 void UART::writeBuffer(unsigned char *d, uint8_t size){
   write(uart0_filestream, d, size);
+}
+
+void UART::closeDevice(){
+  close(1);
 }

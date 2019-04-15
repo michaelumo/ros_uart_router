@@ -18,7 +18,7 @@ BufferOperation::BufferOperation(){
 
 // Clearing buffer length
 void BufferOperation::clearBuffer(){
-  datalen = 0;
+  data.clear();
 }
 
 // Spliting arrays
@@ -38,13 +38,13 @@ uint8_t BufferOperation::lengthofPayload(){
 // Generate checksum from received buffer
 uint16_t BufferOperation::generateChecksum(uint8_t starting_point, uint8_t length_of_checksum){
   uint8_t cs[lengthofPayload()];
-  split(data, cs, starting_point, datalen-length_of_checksum);
+  split(data, cs, starting_point, data.size()-length_of_checksum);
   return crc16(cs, lengthofPayload());
 }
 
 // Get checksum embedded in buffer
 uint16_t BufferOperation::getChecksum(){
-  cksm.in8[0] = data[datalen-2];
-  cksm.in8[1] = data[datalen-1];
+  cksm.in8[0] = data[data.size()-2];
+  cksm.in8[1] = data[data.size()-1];
   return cksm.in16;
 }

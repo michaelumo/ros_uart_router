@@ -27,42 +27,50 @@
 #include <stdio.h>
 #include <cstdint>
 #include <sstream>
-#include <new>
+#include <vector>
+#include <algorithm>
 #include "ros/ros.h"
 #include "ros_uart_router/crc16.hpp"
 #include "ros_uart_router/UART.hpp"
 #include "ros_uart_router/BufferOperation.hpp"
 #include "ros_uart_router/query.h"
 
-bool checkData(BufferOperation*, uint8_t);
+std::vector<std::string> openedDevices;
 
 bool request(ros_uart_router::query::Request &req, ros_uart_router::query::Response &res)
 {
 	UART device(req.device.c_str(), req.baudrate);
-	if (!device.setup()){
-		ROS_INFO("%s",req.device.c_str());
-		ROS_ERROR("Error - Unable to open UART.  Ensure it is not in use by another application");
-		return false;
-	}
-	BufferOperation buff;
-	buff.data.insert(buff.data.begin(), std::begin(req.payload), std::end(req.payload));
-	buff.data.insert(buff.data.begin(), std::begin(req.head), std::end(req.head));
-	buff.datalen = req.sizeof_payload;
-	if(req.crc)buff.data.push_back(crc16(req.payload.data(), req.sizeof_payload));
-	device.writeBuffer(buff.data.data(), buff.datalen);
+	//TODO:if(!(std::find(openedDevices.begin(), openedDevices.end(), req.device.c_str()) == openedDevices.end())){
+		openedDevices.push_back(req.device.c_str());
 
+		if (!device.setup()){
+			ROS_INFO("%s",req.device.c_str());
+			ROS_ERROR("Error - Unable to open UART.  Ensure it is not in use by another application");
+			return false;
+		}
+	//}
+	BufferOperation buff;
+	if(!req.listen_only){
+		buff.data.insert(buff.data.begin(), std::begin(req.payload), std::end(req.payload));
+		buff.data.insert(buff.data.begin(), std::begin(req.head), std::end(req.head));
+		if(req.crc)buff.data.push_back(crc16(req.payload.data(), req.payload.size()));
+		device.writeBuffer(buff.data.data(), buff.data.size());
+	}
 	buff.clearBuffer();
-	device.readBuffer(buff, req.timeOut);
-	if(!buff.datalen){
+	//-------------------------------------------------
+	device.readBuffer(buff, req.time_out);
+	if(!buff.data.size()){
 		ROS_ERROR("Error - Reading Time Out");
 		return false;
 	}
-	for(uint8_t i = 0; i < buff.datalen; i++){
-		res.data[i] = buff.data[i];
-	}
+	res.data = buff.data;
 	if(req.crc && (buff.getChecksum() == buff.generateChecksum(2, 2))){
 		res.ack = true;
 	}else if(req.crc)res.ack = false;
+	/*TODO:if(req.close_device){
+		device.closeDevice();
+		openedDevices.erase(std::remove(openedDevices.begin(), openedDevices.end(), req.device.c_str()), openedDevices.end());
+	}*/
 	return true;
 }
 
@@ -73,9 +81,4 @@ int main(int argc, char **argv){
 	ROS_INFO("ros_uart_router is running..");
 	ros::spin();
 	return 0;
-}
-
-bool checkData(BufferOperation& buff, uint8_t keyword){
-	if(buff.data[0] != 0xAA || buff.data[1] != keyword)return false;
-	else return true;
 }

@@ -13,6 +13,7 @@ public:
   bool setup();
   void readBuffer(BufferOperation &buffer, int timeOut);
   void writeBuffer(unsigned char*, uint8_t);
+  void closeDevice();
 };
 
 #endif
