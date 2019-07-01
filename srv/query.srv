@@ -4,8 +4,8 @@ uint8 time_out
 bool listen_only
 bool crc
 uint8[2] head
-uint8[256] payload
 uint8 sizeof_payload
+uint8[] payload
 bool close_device
 ---
 bool ack

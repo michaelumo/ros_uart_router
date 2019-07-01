@@ -52,21 +52,36 @@ bool request(ros_uart_router::query::Request &req, ros_uart_router::query::Respo
 	BufferOperation buff;
 	if(!req.listen_only){
 		buff.data.insert(buff.data.begin(), std::begin(req.payload), std::end(req.payload));
-		buff.data.insert(buff.data.begin(), std::begin(req.head), std::end(req.head));
-		if(req.crc)buff.data.push_back(crc16(req.payload.data(), req.payload.size()));
+		//buff.data.insert(buff.data.begin(), std::begin(req.head), std::end(req.head));
+		//if(req.payload.size() && req.crc)buff.data.push_back(crc16(req.payload.data(), req.payload.size()));
 		device.writeBuffer(buff.data.data(), buff.data.size());
 	}
 	buff.clearBuffer();
 	//-------------------------------------------------
 	device.readBuffer(buff, req.time_out);
 	if(!buff.data.size()){
-		ROS_ERROR("Error - Reading Time Out");
+		if(!req.listen_only)ROS_ERROR("Error - Reading Time Out");
 		return false;
 	}
 	res.data = buff.data;
-	if(req.crc && (buff.getChecksum() == buff.generateChecksum(2, 2))){
-		res.ack = true;
-	}else if(req.crc)res.ack = false;
+	ROS_ERROR("HERE 1 ?");
+	if(buff.data.size() && req.crc){
+		ROS_ERROR("===%d",buff.generateChecksum(3, 2));
+		ROS_ERROR("---%d",buff.getChecksum());
+		for(int i = 0; i < buff.data.size(); i++){
+			std::cout<<std::hex<<(int)buff.data[i]<<std::endl;
+			//ROS_ERROR("%d",buff.data[i]);
+		}
+		if(buff.getChecksum() == buff.generateChecksum(3, 2)){
+			res.ack = true;
+			ROS_ERROR("getting nice signals..");
+		}
+		ROS_ERROR("PASSED ? ");
+	}else if(buff.data.size() && req.crc){
+		res.ack = false;
+		ROS_ERROR("WTF signals..");
+	}
+	ROS_ERROR("HERE 2 ?");
 	/*TODO:if(req.close_device){
 		device.closeDevice();
 		openedDevices.erase(std::remove(openedDevices.begin(), openedDevices.end(), req.device.c_str()), openedDevices.end());

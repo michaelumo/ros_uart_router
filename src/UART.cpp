@@ -43,9 +43,14 @@ bool UART::setup(){
   return true;
 }
 
+void UART::flush(){
+  tcflush(uart0_filestream, TCIFLUSH);
+}
+
 void UART::readBuffer(BufferOperation &buffer, int timeOut){
   time_t starting_time;
   starting_time = time(NULL);
+  buffer.clearBuffer();
   while (ros::ok()){
     if (uart0_filestream != -1){
       char rx_buffer[256];
@@ -54,10 +59,10 @@ void UART::readBuffer(BufferOperation &buffer, int timeOut){
         if((time(NULL)-starting_time)*1000.0 > timeOut)break;
       }
       else if (rx_length == 0){
-        if(time(NULL)-starting_time > timeOut)break;
+        if((time(NULL)-starting_time)*1000.0 > timeOut)break;
       }
       else {
-        buffer.data.insert(buffer.data.end(), std::begin(rx_buffer), std::end(rx_buffer));
+        buffer.data.insert(buffer.data.end(), std::begin(rx_buffer), std::begin(rx_buffer)+rx_length);
       }
     }
   }

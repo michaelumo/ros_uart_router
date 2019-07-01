@@ -18,28 +18,31 @@ BufferOperation::BufferOperation(){
 
 // Clearing buffer length
 void BufferOperation::clearBuffer(){
-  data.clear();
+  data.erase(data.begin(), data.end());
 }
 
 // Spliting arrays
-void BufferOperation::split(std::vector<uint8_t> &d, uint8_t* other, uint8_t a, uint8_t b){
+void BufferOperation::split(std::vector<uint8_t> &d, std::vector<uint8_t> &other, uint8_t a, uint8_t b){
   for(uint8_t i = a; i < b; i++){
-    other[i-a] = d[i];
+    other.push_back(d[i]);
   }
 }
 
 // Get length of payload embedded in buffer
 uint8_t BufferOperation::lengthofPayload(){
-  uint8_t cs[1];
+  std::vector<uint8_t> cs;
   split(data, cs, 2, 3);
   return uint8_t(cs[0]+1);
 }
 
 // Generate checksum from received buffer
 uint16_t BufferOperation::generateChecksum(uint8_t starting_point, uint8_t length_of_checksum){
-  uint8_t cs[lengthofPayload()];
+  std::vector<uint8_t> cs;
   split(data, cs, starting_point, data.size()-length_of_checksum);
-  return crc16(cs, lengthofPayload());
+  for(int i = 0; i < cs.size(); i++){
+    std::cout<<std::hex<<(int)cs[i]<<std::endl;
+  }
+  return crc16(cs.data(), cs.size());//lengthofPayload());
 }
 
 // Get checksum embedded in buffer

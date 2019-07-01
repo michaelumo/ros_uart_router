@@ -9,7 +9,7 @@ private:
     uint16_t in16;
   };
   cksmConv cksm;
-  void split(std::vector<uint8_t> &d, uint8_t* other, uint8_t a, uint8_t b);
+  void split(std::vector<uint8_t> &d, std::vector<uint8_t> &other, uint8_t a, uint8_t b);
 public:
   std::vector<uint8_t> data;
   BufferOperation();

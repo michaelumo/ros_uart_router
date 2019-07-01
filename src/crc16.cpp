@@ -1,4 +1,5 @@
 // This code generates CRC code by CRC16/ARC algorithm
+// check https://crccalc.com/ to verify
 
 #include <stdio.h>
 #include <cstdint>
