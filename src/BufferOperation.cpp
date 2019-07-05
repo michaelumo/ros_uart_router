@@ -47,7 +47,7 @@ uint16_t BufferOperation::generateChecksum(uint8_t starting_point, uint8_t lengt
 
 // Get checksum embedded in buffer
 uint16_t BufferOperation::getChecksum(){
-  cksm.in8[0] = data[data.size()-2];
-  cksm.in8[1] = data[data.size()-1];
+  cksm.in8[0] = data[data.size()-1];
+  cksm.in8[1] = data[data.size()-2];
   return cksm.in16;
 }
